@@ -191,7 +191,7 @@ colors = get(gca, 'ColorOrder');
         hold on;
         plot(step, f(1,:), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='f_1[k]');
         plot(step, f(2,:), Color=colors(2,:), LineStyle='--', LineWidth=2, DisplayName='f_2[k]');
-        plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-.', LineWidth=2, DisplayName='||r[k]||^2');
+        plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-', LineWidth=1.2, DisplayName='||r[k]||^2');
         legend();
         xlabel('Time sample [k]');
         ylabel('Amplitude');
@@ -232,19 +232,21 @@ colors = get(gca, 'ColorOrder');
 
 % Plots
     % fault + residual
-        subplot(222);
+        subplot(122);
         hold on;
         plot(step, f(1,:), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='f_1[k]');
         plot(step, f(2,:), Color=colors(2,:), LineStyle='--', LineWidth=2, DisplayName='f_2[k]');
-        plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-.', LineWidth=2, DisplayName='||r[k]||^2');
-        legend();
-        ylabel('Amplitude');
-        grid on;
-    
-        subplot(224);
-        hold on;
-        plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-.', LineWidth=2, DisplayName='||r[k]||^2');
+        plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-', LineWidth=1.2, DisplayName='||r[k]||^2');
         legend();
         xlabel('Time sample [k]');
         ylabel('Amplitude');
+        ylim([0; 2*max(sum(r'*r, 1))])
         grid on;
+    
+        % subplot(224);
+        % hold on;
+        % plot(step(s+1:N), sum(r'*r, 1), Color='r', LineStyle='-', LineWidth=1.2, DisplayName='||r[k]||^2');
+        % legend();
+        % xlabel('Time sample [k]');
+        % ylabel('Amplitude');
+        % grid on;
