@@ -1,0 +1,131 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Fault Detection and Isolation - Report}
+
+\author{\IEEEauthorblockN{Emmeran Colot}}
+
+\maketitle
+
+\section{Introduction}
+
+This report covers the different implementations of fault detection and isolation methods for discrete-time systems. It shows and analyses the results obtained based on the theoretical explanations given by Prof. M. Kinnaert in the \textit{Model-Based and Data-Driven Fault Detection and Isolation} course.
+
+The discrete-time state space model is given by
+\begin{equation}
+    \begin{cases}
+        x[k+1] = A x[k] + B u[k] + E_d d[k] + E_f f[k] \\
+        y[k] = C x[k] + D u[k] + G_d d[k] + G_f f[k]
+    \end{cases}
+    \label{eq:ss_model}
+\end{equation}
+where $x \in \mathbb{R}^{n \times 1}$ is the state, $u \in \mathbb{R}^{m \times 1}$ the input to the system, $y \in \mathbb{R}^{p \times 1}$ the output of the system, $d \in \mathbb{R}^{n_d \times 1}$ the disturbance and $f \in \mathbb{R}^{n_f \times 1}$ the fault. The exact values for those matrices are given in Appendix \ref{appendix:exact_model}.
+
+\section{Parity relations based method}
+
+\subsection{Overview of the method}
+
+Based on the state space representation (\ref{eq:ss_model}), $y[k]$ can be expressed as a function of the state at time instance $k-s$ and the input, disturbance and fault from time instance $k-s$ up to $k$. This was derived by recurrence and the resulting equation, in a matrix form, is
+\begin{equation}
+    Y_s(k) = \Theta_s x(k-s) + T_s^u U_s(k) + T_s^d D_s(k) + T_s^f F_s(k).
+    \label{eq:parity_relation}
+\end{equation}
+The "\textit{signal matrices}" are built as follows
+\begin{equation}
+    Y_s(k) = \begin{bmatrix}
+        y[k-s] \\ \vdots \\ y[k]
+    \end{bmatrix}
+    \qquad \cdots \qquad
+    F_s(k) = \begin{bmatrix}
+        f[k-s] \\ \vdots \\ f[k]
+    \end{bmatrix},
+\end{equation}
+and the "\textit{weight matrices}":
+\begin{equation}
+    \begin{gathered}
+        \Theta_s = \begin{bmatrix}
+            C \\ C A \\ \vdots \\ C A^s
+        \end{bmatrix}
+        \quad , \quad
+        T_s^u = \begin{bmatrix}
+            D & \mathbf{0} & \cdots & \mathbf{0} \\
+            C B & D & \ddots & \vdots \\
+            \vdots & \ddots & \ddots & \mathbf{0} \\
+            C A^{s-1} B & \cdots & C B & D
+        \end{bmatrix} \\
+        T_s^{d/f} = \begin{bmatrix}
+            G_{d/f} & \mathbf{0} & \cdots & \mathbf{0} \\
+            C E_{d/f} & G_{d/f} & \ddots & \vdots \\
+            \vdots & \ddots & \ddots & \mathbf{0} \\
+            C A^{s-1} E_{d/f} & \cdots & C E_{d/f} & G_{d/f}
+        \end{bmatrix}
+    \end{gathered}
+\end{equation}
+Because of their nature, disturbances are unknown (stochastic noise, nonlinearities, unmeasured input signal, ...) and the state is often not measured. To only keep from (\ref{eq:parity_relation}) the fault and the measured signals, they are split from the other terms and both sides of the equation is then multiplied by $\Omega_s$. 
+
+The unknown side of the equation can then be cancelled with a clever choice for $\Omega_s$, i.e. a basis of the left null space of $\left[\Theta_s \quad T_s^d\right]$:
+\begin{equation}
+    \Omega_s \left(Y_s(k) - T_s^u U_s(k) - T_s^f F_s(k)\right) = \mathbf{0}.
+\end{equation}
+
+It is worth mentioning the existence condition for $\Omega_s$, which depends on the rank of the matrix to cancel:
+\begin{equation}
+    \text{rank}\begin{bmatrix}
+        \Theta_s & T_s^d
+    \end{bmatrix} < (s+1) p
+    \label{eq:existence_Omega_s}
+\end{equation}
+
+This leads to the definition of the parity vector, which is equal to $\mathbf{0}$ in case there is no fault and is computed by
+\begin{equation}
+    r[k] = \Omega_s \left(Y_s(k) - T_s^u U_s(k)\right).
+    \label{eq:parity_vector}
+\end{equation}
+
+\subsection{Fault detection}
+
+Applied to a system with 1 input and 2 outputs, a simulation has been done with $s = 2$. It contains a sinusoidal disturbance and a fault on the sensors. Fig. \ref{fig:system_evolution} shows what is computed by the simulation in a case where no fault is present.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/System Evolution.png}
+    \caption{Measured signals (top) and internal signals (bottom) in a faultless scenario.}
+    \label{fig:system_evolution}
+\end{figure}
+
+The simulation is ran with a constant bias error on each of the two sensors and the resulting parity vector norm is shown on Fig. \ref{fig:step_fault}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Step Fault.png}
+    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual.}
+    \label{fig:step_fault}
+\end{figure}
+
+The residual on the right subplot indicates that the fault can be detected but is forgotten after a few samples. This is because the second state integrates the input, meaning a constant error will not be detected. On the other hand, the first state is simply amplifying the input. A constant difference between the expected output and the measured one is therefore easily detected.
+
+For the same reason, a ramp-shaped fault will generate a ramp shaped-residual when applied on the first state and a constant residual in the other case, as shown on Fig. \ref{fig:ramp_fault}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Ramp Fault.png}
+    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual. The amplitude of the residual on the second plot was small so it has been zoomed in.}
+    \label{fig:ramp_fault}
+\end{figure}
+
+\subsection{Fault Isolation}
+
+To isolate the fault, i.e. determine which is the faulty sensor, residuals must be crafted by considering some faults as disturbances using a confusion matrix.
+
+
+\include{appendix}
+\end{document}

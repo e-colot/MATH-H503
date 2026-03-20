@@ -1,0 +1,57 @@
+\appendices
+\section{Exact Model}
+\label{appendix:exact_model}
+
+The model used in the simulations is, in continuous time,
+\begin{equation}
+    \dot{x}(t) = A_c x(t) + B_c u(t) + E_{d,c} d(t) + E_{f,c} f(t),
+\end{equation}
+\begin{equation}
+    y(t) = C_c x(t) + D_c u(t) + G_{d,c} d(t) + G_{f,c} f(t),
+\end{equation}
+with
+\begin{equation}
+    A_c = \begin{bmatrix}
+        b\eta_1 & 0 \\
+        1 & 0
+    \end{bmatrix},
+    \quad
+    B_c = \begin{bmatrix}
+        b \\
+        0
+    \end{bmatrix},
+    \quad
+    E_{d,c} = \begin{bmatrix}
+        0 \\
+        1
+    \end{bmatrix},
+\end{equation}
+\begin{equation}
+    E_{f,c} = \mathbf{0}, \quad \text{and} \quad \begin{cases}
+        b = 2.2\\
+        \eta_1 = -10
+    \end{cases}.
+\end{equation}
+
+The output equation matrices are
+\begin{equation}
+    C_c = \begin{bmatrix}
+        1 & 0 \\
+        0 & 1
+    \end{bmatrix},
+    \quad
+    D_c = 0,
+\end{equation}
+\begin{equation}
+    G_{d,c} = \begin{bmatrix}
+        1 \\
+        0
+    \end{bmatrix},
+    \quad
+    G_{f,c} = \begin{bmatrix}
+        1 & 0 \\
+        0 & 1
+    \end{bmatrix}.
+\end{equation}
+
+The discrete-time model in (\ref{eq:ss_model}) is finally obtained using a ZOH discretization with sampling time $T_s = 0.2$ seconds.
