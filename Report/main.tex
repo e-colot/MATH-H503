@@ -118,14 +118,60 @@ For the same reason, a ramp-shaped fault will generate a ramp shaped-residual wh
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Ramp Fault.png}
-    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual. The second fault looks like a step due to the scale difference between the parity vector norm and the fault signal itself.}
+    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual. The second fault looks like a step due to the scale difference between the parity vector norm and the fault signal.}
     \label{fig:ramp_fault}
 \end{figure}
 
 \subsection{Fault Isolation}
 
-To isolate the fault, i.e. determine which is the faulty sensor, residuals must be crafted by considering some faults as disturbances using a confusion matrix.
+To isolate the fault, i.e. determine which is the faulty sensor, residuals must be crafted by considering some faults as disturbances using a confusion matrix. Because on the existence condition on the left null space of $\left[\Theta_s \quad T_s^d\right]$ given by (\ref{eq:existence_Omega_s}), a residual generally cannot be built to control a single fault.
 
+To understand how fault isolation works, the system is slightly modified by adding a second sensor on the first output. Three distinct residuals are then built, each targeting all but one fault according to the following confusion matrix:
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c|ccc}
+        & $f_1$ & $f_2$ & $f_3$ \\
+        \hline
+        $r_1$ & 0 & $\times$ & $\times$ \\
+        $r_2$ & $\times$ & 0 & $\times$ \\
+        $r_3$ & $\times$ & $\times$ & 0 \\
+    \end{tabular}
+\end{table}
+
+To generate $r_1$, the disturbance matrices $E_d$, $G_d$ and the fault matrices $E_f$, $G_f$ are modified. By moving some columns from the fault matrices to the disturbance matrices as follows,
+\begin{equation}
+    \begin{cases}
+        E_d = \begin{bmatrix}
+            E_{d_1}
+        \end{bmatrix} \\
+        E_f = \begin{bmatrix}
+            E_{f_1} & E_{f_2} & E_{f_3}
+        \end{bmatrix} \\
+        G_d = \begin{bmatrix}
+            G_{d_1}
+        \end{bmatrix} \\
+        G_f = \begin{bmatrix}
+            G_{f_1} & G_{f_2} & G_{f_3}
+        \end{bmatrix}
+    \end{cases}
+    \quad \Rightarrow \quad \begin{cases}
+        E_d = \begin{bmatrix}
+            E_{d_1} & E_{f_1}
+        \end{bmatrix} \\
+        E_f = \begin{bmatrix}
+            E_{f_2} & E_{f_3}
+        \end{bmatrix} \\
+        G_d = \begin{bmatrix}
+            G_{d_1} & G_{f_1}
+        \end{bmatrix} \\
+        G_f = \begin{bmatrix}
+            G_{f_2} & G_{f_3}
+        \end{bmatrix}
+    \end{cases}
+\end{equation}
+
+the residual $r_1$ will now only detects faults on the $2^{\text{nd}}$ and $3^{\text{rd}}$ sensors. The same approach allows to generate 3 residuals, and therefore a fault can be isolated.
 
 \include{appendix}
 \end{document}
