@@ -23,6 +23,9 @@ function [A, B, C, D, E_d, E_f, G_d, G_f, sys] = generateShip(Ts, eta1, b, n_phi
          0];
     G_d = [ones(n_phi, 1);
            0];
+    if (n_phi == 2)
+        G_d = [0; 0; 1];
+    end
     G_f = eye(n_phi+1);
     
     sysC = ss(A, [B, E_d, E_f], C, [D, G_d, G_f]);

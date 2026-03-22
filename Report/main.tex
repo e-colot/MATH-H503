@@ -171,7 +171,25 @@ To generate $r_1$, the disturbance matrices $E_d$, $G_d$ and the fault matrices 
     \end{cases}
 \end{equation}
 
-the residual $r_1$ will now only detects faults on the $2^{\text{nd}}$ and $3^{\text{rd}}$ sensors. The same approach allows to generate 3 residuals, and therefore a fault can be isolated.
+the residual $r_1$ will now only detects faults on the $2^{\text{nd}}$ and $3^{\text{rd}}$ sensors. The same approach allows to generate 3 residuals, and therefore a fault can be isolated by inspecting which residual has not increased.
+
+Fig. \ref{fig:isolation} shows a fault applied on different sensors and the corresponding residuals. Looking at the ones that are activated and combining it with the knowledge of the confusion matrix shows it is working as intended.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Isolation.png}
+    \caption{Applied fault (top) and resulting residual (bottom).}
+    \label{fig:isolation}
+\end{figure}
+
+If multiple errors occur at the same time, there is no way of determining which sensor is faulty as shown on Fig. \ref{fig:isolation_combined}. As all the residuals are active between the $100^{\text{th}}$ and the $150^{\text{th}}$ samples, faults are still detected but cannot be isolated.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Isolation Combined.png}
+    \caption{Applied fault (top) and resulting residual (bottom).}
+    \label{fig:isolation_combined}
+\end{figure}
 
 \include{appendix}
 \end{document}

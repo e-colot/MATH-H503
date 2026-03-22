@@ -28,7 +28,8 @@ clear; close all; clc;
         d = Amplitude*sin(2*pi*f_w*t);
         % fault
         f = zeros(3, N);
-        f(1, floor(N/4):end) = 2; % step fault on first sensor
+        f(1, floor(N/5):floor(2*N/5)) = 2; % step fault on first sensor
+        f(2, floor(3*N/5):floor(4*N/5)) = 2; % step fault on second sensor
     
     [x, y] = simulateSystem(u, d, f, t, x0, sys);
 
@@ -112,16 +113,24 @@ s = 2;
 % Plots
     figure('Name', 'Step-like fault');
     colors = get(gca, 'ColorOrder');
-    % fault + residual
-        subplot(111);
-        title('Fault and Residual');
+    % fault
+        subplot(211);
+        title('Faults');
         hold on;
-        plot(t, f(1,:), Color=colors(1,:), LineStyle='-', LineWidth=1, DisplayName='f_1(t)');
-        plot(t, f(2,:), Color=colors(2,:), LineStyle='-', LineWidth=1, DisplayName='f_2(t)');
-        plot(t, f(3,:), Color=colors(3,:), LineStyle='-', LineWidth=1, DisplayName='f_3(t)');
-        plot(t(s+1:N), sum(r1'*r1, 1), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='r_1(t)');
-        plot(t(s+1:N), sum(r2'*r2, 1), Color=colors(2,:), LineStyle='--', LineWidth=2, DisplayName='r_2(t)');
-        plot(t(s+1:N), sum(r3'*r3, 1), Color=colors(3,:), LineStyle='--', LineWidth=2, DisplayName='r_3(t)');
+        plot(t, f(1,:), Color=colors(1,:), LineStyle='-', LineWidth=2, DisplayName='f_1(t)');
+        plot(t, f(2,:), Color=colors(2,:), LineStyle='-', LineWidth=2, DisplayName='f_2(t)');
+        %plot(t, f(3,:), Color=colors(3,:), LineStyle='-', LineWidth=1, DisplayName='f_3(t)');
+        legend();
+        ylabel('Amplitude');
+        grid on;
+
+    % residuals
+        subplot(212);
+        title('Residuals');
+        hold on;
+        plot(t(s+1:N), sum(r1'*r1, 1)/max(sum(r1'*r1, 1)), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='r_1(t) - normalized');
+        plot(t(s+1:N), sum(r2'*r2, 1)/max(sum(r2'*r2, 1)), Color=colors(2,:), LineStyle='-.', LineWidth=2, DisplayName='r_2(t) - normalized');
+        plot(t(s+1:N), sum(r3'*r3, 1)/max(sum(r3'*r3, 1)), Color=colors(3,:), LineStyle=':', LineWidth=2, DisplayName='r_3(t) - normalized');
         legend();
         xlabel('Time [s]');
         ylabel('Amplitude');
