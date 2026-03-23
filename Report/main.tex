@@ -85,10 +85,10 @@ It is worth mentioning the existence condition for $\Omega_s$, which depends on 
     \label{eq:existence_Omega_s}
 \end{equation}
 
-This leads to the definition of the parity vector, which is equal to $\mathbf{0}$ in case there is no fault and is computed by
+This leads to the definition of the residual vector, which is equal to $\mathbf{0}$ in case there is no fault and is computed by
 \begin{equation}
     r[k] = \Omega_s \left(Y_s(k) - T_s^u U_s(k)\right).
-    \label{eq:parity_vector}
+    \label{eq:residual_vector}
 \end{equation}
 
 \subsection{Fault detection}
@@ -102,7 +102,7 @@ Applied to a system with 1 input and 2 outputs, a simulation has been done with 
     \label{fig:system_evolution}
 \end{figure}
 
-The simulation is ran with a constant bias error on each of the two sensors and the resulting parity vector norm is shown on Fig. \ref{fig:step_fault}.
+The simulation is ran with a constant bias error on each of the two sensors and the resulting residual vector norm is shown on Fig. \ref{fig:step_fault}.
 
 \begin{figure}[htbp]
     \centering
@@ -118,15 +118,15 @@ For the same reason, a ramp-shaped fault will generate a ramp shaped-residual wh
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Ramp Fault.png}
-    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual. The second fault looks like a step due to the scale difference between the parity vector norm and the fault signal.}
+    \caption{Applied fault (on state 1 on the left plot and state 2 on the right plot) and resulting residual. The second fault looks like a step due to the scale difference between the residual vector norm and the fault signal.}
     \label{fig:ramp_fault}
 \end{figure}
 
 \subsection{Fault Isolation}
 
-To isolate the fault, i.e. determine which is the faulty sensor, residuals must be crafted by considering some faults as disturbances using a confusion matrix. Because on the existence condition on the left null space of $\left[\Theta_s \quad T_s^d\right]$ given by (\ref{eq:existence_Omega_s}), a residual generally cannot be built to control a single fault.
+To isolate the fault, i.e. determine which is the faulty sensor, residuals must be crafted by considering some faults as disturbances using a incidence matrix. Because on the existence condition on the left null space of $\left[\Theta_s \quad T_s^d\right]$ given by (\ref{eq:existence_Omega_s}), a residual generally cannot be built to control a single fault.
 
-To understand how fault isolation works, the system is slightly modified by adding a second sensor on the first output. Three distinct residuals are then built, each targeting all but one fault according to the following confusion matrix:
+To understand how fault isolation works, the system is slightly modified by adding a second sensor on the first output. Three distinct residuals are then built, each targeting all but one fault according to the following incidence matrix:
 
 \begin{table}[htbp]
     \centering
@@ -173,7 +173,7 @@ To generate $r_1$, the disturbance matrices $E_d$, $G_d$ and the fault matrices 
 
 the residual $r_1$ will now only detects faults on the $2^{\text{nd}}$ and $3^{\text{rd}}$ sensors. The same approach allows to generate 3 residuals, and therefore a fault can be isolated by inspecting which residual has not increased.
 
-Fig. \ref{fig:isolation} shows a fault applied on different sensors and the corresponding residuals. Looking at the ones that are activated and combining it with the knowledge of the confusion matrix shows it is working as intended.
+Fig. \ref{fig:isolation} shows a fault applied on different sensors and the corresponding residuals. Looking at the ones that are activated and combining it with the knowledge of the incidence matrix shows it is working as intended.
 
 \begin{figure}[htbp]
     \centering

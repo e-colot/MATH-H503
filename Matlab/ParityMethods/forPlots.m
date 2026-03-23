@@ -362,7 +362,7 @@ s = 2;
     colors = get(gca, 'ColorOrder');
     % fault
         subplot(211);
-        title('Faults');
+        %title('Faults');
         hold on;
         plot(step, f(1,:), Color=colors(1,:), LineStyle='-', LineWidth=2, DisplayName='f_1(k)');
         plot(step, f(2,:), Color=colors(2,:), LineStyle='-', LineWidth=2, DisplayName='f_2(k)');
@@ -373,7 +373,7 @@ s = 2;
 
     % residuals
         subplot(212);
-        title('Residuals');
+        %title('Residuals');
         hold on;
         plot(step(s+1:N), sum(r1'*r1, 1), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='r_1(k)');
         plot(step(s+1:N), sum(r2'*r2, 1), Color=colors(2,:), LineStyle='-.', LineWidth=2, DisplayName='r_2(k)');
@@ -473,7 +473,7 @@ s = 2;
     colors = get(gca, 'ColorOrder');
     % fault
         subplot(211);
-        title('Faults');
+        %title('Faults');
         hold on;
         plot(step, f(1,:), Color=colors(1,:), LineStyle='-', LineWidth=2, DisplayName='f_1(k)');
         plot(step, f(2,:), Color=colors(2,:), LineStyle='-', LineWidth=2, DisplayName='f_2(k)');
@@ -484,7 +484,7 @@ s = 2;
 
     % residuals
         subplot(212);
-        title('Residuals');
+        %title('Residuals');
         hold on;
         plot(step(s+1:N), sum(r1'*r1, 1), Color=colors(1,:), LineStyle='--', LineWidth=2, DisplayName='r_1(k)');
         plot(step(s+1:N), sum(r2'*r2, 1), Color=colors(2,:), LineStyle='-.', LineWidth=2, DisplayName='r_2(k)');
