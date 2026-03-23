@@ -1,5 +1,5 @@
 \appendices
-\section{Exact Model}
+\section{Exact Ship Model}
 \label{appendix:exact_model}
 
 The model used in the simulations is, in continuous time,
@@ -55,3 +55,38 @@ The output equation matrices are
 \end{equation}
 
 The discrete-time model in (\ref{eq:ss_model}) is finally obtained using a ZOH discretization with sampling time $T_s = 0.2$ seconds.
+
+\section{Three-Phased signal Model}
+\label{appendix:three_phased_model}
+
+Fig. \ref{fig:data} shows the signal in a case no fault is applied. Knowing the sampling period $T_s = 1$ms, the frequency of the signal is computed by
+\begin{equation}
+    \omega_{\text{exc}} = \frac{2 \pi}{50  T_s}
+\end{equation}
+because there are $50$ measurements per period.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Data.png}
+    \caption{Three-phased signal measured by 3 (faultless) sensors.}
+    \label{fig:data}
+\end{figure}
+
+The continuous-time state space model of this system (which has no input) is given by
+\begin{equation}
+    \mathbf{\dot{x}} = \begin{bmatrix}
+        0 & \omega_{\text{exc}}\\
+        -\omega_{\text{exc}} & 0
+    \end{bmatrix} \mathbf{x}.
+\end{equation}
+Because there is an offset between the three phases, the output relationship is expressed as follows, where $\mathbf{f}$ is the fault vector:
+\begin{equation}
+    \mathbf{y} = \begin{bmatrix}
+        \cos(0) & \sin(0)\\
+        \cos(\frac{-2 \pi}{3}) & \sin(\frac{-2 \pi}{3}) \\
+        \cos(\frac{2 \pi}{3}) & \sin(\frac{2 \pi}{3}) \\
+    \end{bmatrix} \mathbf{x} + \mathbf{f}.
+\end{equation}
+
+This continuous-time model is then discretized using the ZOH with the known sampling frequency.
+

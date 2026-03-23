@@ -178,7 +178,7 @@ Fig. \ref{fig:isolation} shows a fault applied on different sensors and the corr
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Isolation.png}
-    \caption{Applied fault (top) and resulting residual (bottom).}
+    \caption{Applied faults (top) and resulting residuals (bottom).}
     \label{fig:isolation}
 \end{figure}
 
@@ -187,8 +187,75 @@ If multiple errors occur at the same time, there is no way of determining which 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/ParityMethods/Isolation Combined.png}
-    \caption{Applied fault (top) and resulting residual (bottom).}
+    \caption{Applied faults (top) and resulting residuals (bottom).}
     \label{fig:isolation_combined}
+\end{figure}
+
+\section{Observer based method}
+
+In this section, faults will be detected and isolated using methods based on state estimation. Depending on the type of model, Luenberger estimators or Kalman filters will be applied to build residuals.
+
+\subsection{Deterministic model}
+
+Starting from the discrete-time state space model (\ref{eq:ss_model}), it is here considered to be free of any disturbance. A Luenberger observer is then built such that $\hat{x}$ estimates the true state $x$ using
+\begin{equation}
+    \hat{x}[k+1] = A\hat{x}[k] + B u[k] + L \left(y[k] - C\hat{x}[k] - D u[k]\right).
+\end{equation}
+
+The residual is then defined as the difference between the estimated output $\hat{y}$ and the measured one
+\begin{equation}
+    \begin{aligned}
+        &\Leftrightarrow r[k] = y[k] - \hat{y}[k] \\
+        &\Leftrightarrow r[k] = y[k] - C \hat{x}[k] - D u[k]
+    \end{aligned}
+\end{equation}
+
+To go towards fault isolation, the $C$ and $D$ matrices are truncated of one or more outputs, which build observers of a subsystem. This allows to detect faults that appear on a specific subset of sensors.
+
+There is a condition on the existence of this observer which is quite obvious: $(A, C_{i, .})$ should be observable, where $C_{i,.}$ represents the $i^{\text{th}}$ row of $C$\footnote{This condition can be weakened as the observer could be built to only observe the observable subsystem.}.
+
+The objective is to perform fault detection and isolation on the output signal of a tree-phased signal, which model is derived in Appendix \ref{appendix:three_phased_model}. A first set of observers were built using the following incidence matrix:
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c|ccc}
+        & $f_1$ & $f_2$ & $f_3$ \\
+        \hline
+        $r_1$ & $\times$ & 0 & 0 \\
+        $r_2$ & 0 & $\times$ & 0 \\
+        $r_3$ & 0 & 0 & $\times$ \\
+    \end{tabular}
+\end{table}
+
+Applied on the faulty signal, the measured signals and the residuals are shown on Fig. \ref{fig:fault_present} and the bias on the second signal is clearly identified. The initial estimated state is randomly chosen, which explains why the residuals are not null in the first few samples.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Fault present.png}
+    \caption{Measured signals (top) and resulting residuals (bottom).}
+    \label{fig:fault_present}
+\end{figure}
+
+A different incidence matrix:
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c|ccc}
+        & $f_1$ & $f_2$ & $f_3$ \\
+        \hline
+        $r_1$ & 0 & $\times$ & $\times$ \\
+        $r_2$ & $\times$ & 0 & $\times$ \\
+        $r_3$ & $\times$ & $\times$ & 0 \\
+    \end{tabular}
+\end{table}
+
+was applied on the same signal and the residuals also allow to isolate the fault, as the $1^{\text{st}}$ and the $3^{\text{rd}}$ residuals are non-zero on Fig. \ref{fig:fault_present_alt}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Fault present alt.png}
+    \caption{Residuals with the alternative incidence matrix.}
+    \label{fig:fault_present_alt}
 \end{figure}
 
 \include{appendix}
