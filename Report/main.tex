@@ -198,6 +198,7 @@ In this section, faults will be detected and isolated using methods based on sta
 The objective is to perform fault detection and isolation on the output signal of a tree-phased signal, which model is derived in Appendix \ref{appendix:three_phased_model}. Because there is no input to the system, all the equations in this section do not contain the input term $u$ nor the related matrices of the state space model $B$ and $D$.
 
 \subsection{Deterministic model}
+\label{sec:Luenberger_observer}
 
 Starting from the discrete-time state space model (\ref{eq:ss_model}), it is here considered to be free of any disturbance. A Luenberger observer is then built such that $\hat{x}$ estimates the true state $x$ using
 \begin{equation}
@@ -279,6 +280,24 @@ $R$ is the measurement noise matrix, measured by computing the variance of the d
 \begin{equation}
     r[k] = y[k] - C \hat{x}[k]
 \end{equation}
+
+As in Sec. \ref{sec:Luenberger_observer}, different observers can be built by selecting specific rows of the output matrix $C$, effectively selecting outputs on which checking for fault. With a diagonal incidence matrix, the fault isolation algorithm has been tested on a noisy faultless signal on Fig. \ref{fig:fault_present_Kalman} where it can be seen that the mean residuals lay close to zero.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Fault present Kalman.png}
+    \caption{Residuals in a faultless scenario.}
+    \label{fig:fault_present_Kalman}
+\end{figure}
+
+Fig. \ref{fig:fault_present_alt_Kalman} showcases the effectiveness of fault isolation as only the second residual has a non-zero mean.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Fault present alt Kalman.png}
+    \caption{Measured signal (top) and residuals(bottom).}
+    \label{fig:fault_present_alt_Kalman}
+\end{figure}
 
 \include{appendix}
 \end{document}
