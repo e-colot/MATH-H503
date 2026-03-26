@@ -210,6 +210,7 @@ The residual is then defined as the difference between the estimated output $\ha
         &\Leftrightarrow r[k] = y[k] - \hat{y}[k] \\
         &\Leftrightarrow r[k] = y[k] - C \hat{x}[k]
     \end{aligned}
+    \label{eq:Luenberger_residual}
 \end{equation}
 
 To go towards fault isolation, the $C$matrix is truncated of one or more outputs, which build observers of a subsystem. This allows to detect faults that appear on a specific subset of sensors.
@@ -264,7 +265,20 @@ was applied on the same signal and the residuals also allow to isolate the fault
 
 For cases where uncorrelated white gaussian noise is present, it is known that the Kalman filter is the optimal state estimator. The fault isolation method is therefore modified.
 
-The estimated state 
+The estimated state $\hat{x}$ is obtained by
+\begin{equation}
+    \hat{x}[k+1] = A \hat{x}[k] + K[k] \left(y[k] - C \hat{x}[k]\right),
+\end{equation}
+which is the basic Kalman state update. The gain $K$ equation and the state variance $\Sigma$ are also kept as usual:
+\begin{gather}
+    K[k] = A \Sigma[k] C^T \left(C \Sigma[k] C^T + R\right)^{-1} \\
+    \Sigma[k+1] = A \Sigma[k] A^T - K[k] C \Sigma[k] A^T
+\end{gather}
+
+$R$ is the measurement noise matrix, measured by computing the variance of the difference between the noisy (non-faulty) signal and the perfect one. Note the process noise matrix $Q$ has been removed from the equation as no process noise is present. Finally, the residual is defined just like (\ref{eq:Luenberger_residual}):
+\begin{equation}
+    r[k] = y[k] - C \hat{x}[k]
+\end{equation}
 
 \include{appendix}
 \end{document}

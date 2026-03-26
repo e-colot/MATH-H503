@@ -3,10 +3,10 @@ clear; close all; clc;
 % -------- System Creation ----------
 
 Ts = 1e-3;
-load("noiselessData\triphase_healthy_0008.mat");
-y1 = signals_nonoise;
-load("noiselessData\triphase_faulty_0034.mat");
-y2 = signals_nonoise;
+load("noisyData\triphase_snr25db_healthy_0008.mat");
+y1 = signals;
+load("noisyData\triphase_snr25db_faulty_0034.mat");
+y2 = signals;
 
 N = size(y1, 2);
 w_exc = 2*pi/(50*Ts);
@@ -37,167 +37,6 @@ D = D_(:, 1);
 G = D_(:, 2:end);
 
 clear B_ D_;
-
-    figure('Name', 'Data');
-    colors = get(gca, 'ColorOrder');
-
-    hold on;
-    plot(step, y1(1,:), Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='y_1[k]');
-    plot(step, y1(2,:), Color=colors(2,:), LineWidth=2, LineStyle="-", DisplayName='y_2[k]');
-    plot(step, y1(3,:), Color=colors(3,:), LineWidth=2, LineStyle="-", DisplayName='y_3[k]');
-
-    legend();
-    grid on;
-    xlabel('Time sample[k]');
-    ylabel('Amplitude');
-
-
-%% Fault present
-
-y = y2; % faulty
-
-% sensor 1
-    C1 = C(1,:);
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C1', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r1 = zeros(1, N);
-
-    for k = 1:N
-        r1(k) = y(1,k) - C1*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r1(k);
-    end
-
-% sensor 2
-    C2 = C(2,:);
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C2', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r2 = zeros(1, N);
-
-    for k = 1:N
-        r2(k) = y(2,k) - C2*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r2(k);
-    end
-
-% sensor 3
-    C3 = C(3,:);
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C3', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r3 = zeros(1, N);
-
-    for k = 1:N
-        r3(k) = y(3,k) - C3*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r3(k);
-    end
-
-    figure('Name', 'Fault present');
-    colors = get(gca, 'ColorOrder');
-
-    subplot(211);    
-    hold on;
-    plot(step, y2(1,:), Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='y_1[k]');
-    plot(step, y2(2,:), Color=colors(2,:), LineWidth=2, LineStyle="-", DisplayName='y_2[k]');
-    plot(step, y2(3,:), Color=colors(3,:), LineWidth=2, LineStyle="-", DisplayName='y_3[k]');
-
-    legend();
-    grid on;
-    ylabel('Amplitude');
-
-    subplot(212);
-    hold on;
-    plot(step, r1, Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='r_1[k]');
-    plot(step, r2, Color=colors(2,:), LineWidth=2, LineStyle="-.", DisplayName='r_2[k]');
-    plot(step, r3, Color=colors(3,:), LineWidth=2, LineStyle="--", DisplayName='r_3[k]');
-
-    legend();
-    grid on;
-    xlabel('Time sample[k]');
-    ylabel('Amplitude');
-    ylim([-0.01, 0.05]);
-
-%% different residuals
-
-y = y2; % faulty
-
-% sensor 1
-    C1 = [C(2,:); C(3,:)];
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C1', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r1 = zeros(2, N);
-
-    for k = 1:N
-        r1(:, k) = [y(2,k);y(3,k)] - C1*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r1(:, k);
-    end
-
-% sensor 2
-    C2 = [C(1,:); C(3,:)];
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C2', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r2 = zeros(2, N);
-
-    for k = 1:N
-        r2(:, k) = [y(1,k);y(3,k)] - C2*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r2(:, k);
-    end
-
-% sensor 3
-    C3 = [C(1,:); C(2,:)];
-    x0 = 0.05 * randn(2, 1);
-    
-    L = place(A', C3', [0.2 0.3])';
-
-    x_hat = zeros(size(A, 1), N+1);
-    x_hat(:, 1) = x0;
-    r3 = zeros(2, N);
-
-    for k = 1:N
-        r3(:, k) = [y(1,k);y(2,k)] - C3*x_hat(:, k);
-        x_hat(:, k+1) = A*x_hat(:, k) + L*r3(:, k);
-    end
-
-    figure('Name', 'Fault present alt');
-    colors = get(gca, 'ColorOrder');
-
-    hold on;
-    plot(step, sum(r1'*r1, 1), Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='r_1[k]');
-    plot(step, sum(r2'*r2, 1), Color=colors(2,:), LineWidth=2, LineStyle="-.", DisplayName='r_2[k]');
-    plot(step, sum(r3'*r3, 1), Color=colors(3,:), LineWidth=2, LineStyle="--", DisplayName='r_3[k]');
-
-    legend();
-    grid on;
-    xlabel('Time sample[k]');
-    ylabel('Amplitude');
-    ylim([-2, 10]);
-
-%% Kalman based
-
-% -------- System Creation ----------
-
-Ts = 1e-3;
-load("noisyData\triphase_snr25db_healthy_0008.mat");
-y1 = signals;
-load("noisyData\triphase_snr25db_faulty_0034.mat");
-y2 = signals;
 
 % Noise estimation:
     % load non noisy signal
@@ -284,19 +123,18 @@ y = y1;
 
 % plots
 
-    figure('Name', 'Fault present Kalman');
+    figure('Name', 'Faultless');
     colors = get(gca, 'ColorOrder');
 
     hold on;
-    plot(step, sum(r1'*r1, 1), Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='r_1[k]');
-    plot(step, sum(r2'*r2, 1), Color=colors(2,:), LineWidth=2, LineStyle="-.", DisplayName='r_2[k]');
-    plot(step, sum(r3'*r3, 1), Color=colors(3,:), LineWidth=2, LineStyle="--", DisplayName='r_3[k]');
+    plot(step, r1, Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='r_1[k]');
+    plot(step, r2, Color=colors(2,:), LineWidth=2, LineStyle="-", DisplayName='r_2[k]');
+    plot(step, r3, Color=colors(3,:), LineWidth=2, LineStyle="-", DisplayName='r_3[k]');
 
     legend();
     grid on;
     xlabel('Time sample[k]');
     ylabel('Amplitude');
-    ylim([-0.5 0.5]);
 
 %% Faulty signal
 
@@ -376,27 +214,15 @@ y = y2;
 
 % plots
 
-    figure('Name', 'Fault present alt Kalman');
+    figure('Name', 'Fault present');
     colors = get(gca, 'ColorOrder');
 
-    subplot(211);    
-    hold on;
-    plot(step, y(1,:), Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='y_1[k]');
-    plot(step, y(2,:), Color=colors(2,:), LineWidth=2, LineStyle="-", DisplayName='y_2[k]');
-    plot(step, y(3,:), Color=colors(3,:), LineWidth=2, LineStyle="-", DisplayName='y_3[k]');
-
-    legend();
-    grid on;
-    ylabel('Amplitude');
-
-    subplot(212);
     hold on;
     plot(step, r1, Color=colors(1,:), LineWidth=2, LineStyle="-", DisplayName='r_1[k]');
-    plot(step, r2, Color=colors(2,:), LineWidth=2, LineStyle="-.", DisplayName='r_2[k]');
-    plot(step, r3, Color=colors(3,:), LineWidth=2, LineStyle="--", DisplayName='r_3[k]');
+    plot(step, r2, Color=colors(2,:), LineWidth=2, LineStyle="-", DisplayName='r_2[k]');
+    plot(step, r3, Color=colors(3,:), LineWidth=2, LineStyle="-", DisplayName='r_3[k]');
 
     legend();
     grid on;
     xlabel('Time sample[k]');
     ylabel('Amplitude');
-    ylim([-0.2 0.8]);
