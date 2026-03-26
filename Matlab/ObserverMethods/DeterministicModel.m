@@ -45,6 +45,10 @@ y = y1; % not faulty
 % sensor 1
     C1 = C(1,:);
     x0 = randn(2, 1);
+
+    if (rank([C1; C1*A]) < 2)
+        error('First observer is unobservable')
+    end
     
     L = place(A', C1', [0.2 0.3])';
 
@@ -60,6 +64,10 @@ y = y1; % not faulty
 % sensor 2
     C2 = C(2,:);
     x0 = randn(2, 1);
+
+    if (rank([C2; C2*A]) < 2)
+        error('Second observer is unobservable')
+    end
     
     L = place(A', C2', [0.2 0.3])';
 
@@ -75,6 +83,10 @@ y = y1; % not faulty
 % sensor 3
     C3 = C(3,:);
     x0 = randn(2, 1);
+
+    if (rank([C3; C3*A]) < 2)
+        error('Third observer is unobservable')
+    end
     
     L = place(A', C3', [0.2 0.3])';
 
@@ -108,6 +120,10 @@ y = y2; % faulty
 % sensor 1
     C1 = C(1,:);
     x0 = randn(2, 1);
+
+    if (rank([C1; C1*A]) < 2)
+        error('First observer is unobservable')
+    end
     
     L = place(A', C1', [0.2 0.3])';
 
@@ -123,6 +139,10 @@ y = y2; % faulty
 % sensor 2
     C2 = C(2,:);
     x0 = randn(2, 1);
+
+    if (rank([C2; C2*A]) < 2)
+        error('Second observer is unobservable')
+    end
     
     L = place(A', C2', [0.2 0.3])';
 
@@ -138,6 +158,10 @@ y = y2; % faulty
 % sensor 3
     C3 = C(3,:);
     x0 = randn(2, 1);
+
+    if (rank([C3; C3*A]) < 2)
+        error('Third observer is unobservable')
+    end
     
     L = place(A', C3', [0.2 0.3])';
 
