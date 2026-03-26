@@ -195,26 +195,28 @@ If multiple errors occur at the same time, there is no way of determining which 
 
 In this section, faults will be detected and isolated using methods based on state estimation. Depending on the type of model, Luenberger estimators or Kalman filters will be applied to build residuals.
 
+The objective is to perform fault detection and isolation on the output signal of a tree-phased signal, which model is derived in Appendix \ref{appendix:three_phased_model}. Because there is no input to the system, all the equations in this section do not contain the input term $u$ nor the related matrices of the state space model $B$ and $D$.
+
 \subsection{Deterministic model}
 
 Starting from the discrete-time state space model (\ref{eq:ss_model}), it is here considered to be free of any disturbance. A Luenberger observer is then built such that $\hat{x}$ estimates the true state $x$ using
 \begin{equation}
-    \hat{x}[k+1] = A\hat{x}[k] + B u[k] + L \left(y[k] - C\hat{x}[k] - D u[k]\right).
+    \hat{x}[k+1] = A\hat{x}[k] + L \left(y[k] - C\hat{x}[k]\right).
 \end{equation}
 
 The residual is then defined as the difference between the estimated output $\hat{y}$ and the measured one
 \begin{equation}
     \begin{aligned}
         &\Leftrightarrow r[k] = y[k] - \hat{y}[k] \\
-        &\Leftrightarrow r[k] = y[k] - C \hat{x}[k] - D u[k]
+        &\Leftrightarrow r[k] = y[k] - C \hat{x}[k]
     \end{aligned}
 \end{equation}
 
-To go towards fault isolation, the $C$ and $D$ matrices are truncated of one or more outputs, which build observers of a subsystem. This allows to detect faults that appear on a specific subset of sensors.
+To go towards fault isolation, the $C$matrix is truncated of one or more outputs, which build observers of a subsystem. This allows to detect faults that appear on a specific subset of sensors.
 
 There is a condition on the existence of this observer which is quite obvious: $(A, C_{i, .})$ should be observable, where $C_{i,.}$ represents the $i^{\text{th}}$ row of $C$\footnote{This condition can be weakened as the observer could be built to only observe the observable subsystem.}.
 
-The objective is to perform fault detection and isolation on the output signal of a tree-phased signal, which model is derived in Appendix \ref{appendix:three_phased_model}. A first set of observers were built using the following incidence matrix:
+A first set of observers were built using the following incidence matrix:
 
 \begin{table}[htbp]
     \centering
@@ -257,6 +259,12 @@ was applied on the same signal and the residuals also allow to isolate the fault
     \caption{Residuals with the alternative incidence matrix.}
     \label{fig:fault_present_alt}
 \end{figure}
+
+\subsection{Stochastic model}
+
+For cases where uncorrelated white gaussian noise is present, it is known that the Kalman filter is the optimal state estimator. The fault isolation method is therefore modified.
+
+The estimated state 
 
 \include{appendix}
 \end{document}

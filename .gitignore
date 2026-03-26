@@ -1,3 +1,5 @@
+*.asv
+
 # LaTeX intermediate files
 *.aux
 *.bbl
