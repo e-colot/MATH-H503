@@ -191,6 +191,84 @@ If multiple errors occur at the same time, there is no way of determining which 
     \label{fig:isolation_combined}
 \end{figure}
 
+\subsection{Redundant sensors}
+
+This section shows how a parity-based approach can be used to detect and isolate faults in a stochastic framework. The studied system is described in Appendix \ref{appendix:pressure_sensors} and its simpler form compared to (\ref{eq:ss_model}) facilitates the residual computation. The absence of a state update means $\Omega$ becomes the left null space of $C$ only, and the residual becomes:
+\begin{equation}
+    \begin{aligned}
+        r[k] &= \Omega y[k]\\
+        &= \Omega \left(f[k] + \xi[k] \right)
+    \end{aligned}
+\end{equation}
+
+The variance of the residual can be computed as follows, taking into account $\xi$ is zero-mean.
+\begin{equation}
+    \mathbb{E}\Big\{ \big(r[k] - \Omega f[k]\big)\big(r[k] - \Omega f[k]\big)^T \Big\} = \Omega R \Omega^T
+\end{equation}
+
+This leads to the definition of the normalized residual such that $\tilde{r} \sim \mathcal{N}(0, 1)$.
+
+\begin{equation}
+    \label{eq:normalized_residual}
+    \begin{gathered}
+        \tilde{r}[k] = F y[k]\\
+        \text{where} \quad F = \begin{bmatrix}
+            F_1 & F_2 & F_3
+        \end{bmatrix} = \Big(\Omega R \Omega^T\Big)^{-\frac{1}{2}} \Omega
+    \end{gathered}
+\end{equation}
+
+A decision layer is then built on top of this residual to estimate when a fault is occurring and when not. For this purpose, a detection measure $d[k]$ is defined based on sum of squares of residuals, meaning $d \sim \chi^2(d_f)$\footnote{$d_f$ is the number of degrees of freedom of variable $d$, which depends on its definition}. Two decision criterions are used here:
+\begin{equation}
+    \label{eq:decision_criterion}
+    d[k] = \begin{cases}
+        \tilde{r}_1^2[k] + \tilde{r}_2^2[k], \hspace{2.35cm} \text{the overall criterion}\\
+        \sum_{i=0}^{N_w} \tilde{r}_1^2[k-i] + \tilde{r}_2^2[k-i], \quad \text{the windowed criterion}
+    \end{cases}
+\end{equation}
+
+The threshold value is determined based on this $\chi^2$ distribution and is here chosen to let $1$\% of the samples to be above it. For a measure to be considered faulty, the percentage of residuals above this threshold should be larger than the theoretical $1$\%. 
+
+Fig. \ref{fig:residual_stochastic} shows that a faultless scenario (here with $10^4$ samples) generates around $1$\% of above-threshold residuals, as expected. This number goes up to $\simeq 1.5$\% in this test scenario (fault of $10$\% of the steady state value).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/RedundantSensors/Residual Stochastic.png}
+    \caption{Residuals (blue) and fault directions: $F_1$ in orange, $F_2$ in yellow and $F_3$ in purple. Residuals above the threshold are colored with the fault they are attributed to.}
+    \label{fig:residual_stochastic}
+\end{figure}
+
+Isolation is performed by matching above-threshold residuals to the fault vector $F_i$ they are the closest (angularly). Fig. \ref{fig:residual_stochastic} shows that the faulty sensor is correctly identified.
+
+\subsubsection{Decision criterion comparison}
+
+From (\ref{eq:decision_criterion}), it can be seen that the overall criterion is equal to the windowed criterion, if the window length $N_w$ is set to $1$. Therefore, the decision criterion is compared for a set of window lengths as shown on Fig. \ref{fig:windowed_residual_stochastic}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/RedundantSensors/Windowed stochastic residual.png}
+    \caption{Decision variable depending on the window length for a fault occurring from sample 5000 until the last sample. $d[k]$ is scaled by their threshold such that their overlapping has a meaning.}
+    \label{fig:windowed_residual_stochastic}
+\end{figure}
+
+It can be seen that increasing the window length smoothen $d[k]$, which makes it stick closer to the threshold. Once the default has occurred, almost every sample is detected as being faulty and the above-threshold percentage increases with the window size, as shown in Table \ref{tab:window_above_threshold}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Percentage of samples above threshold depending on the window length .}
+    \label{tab:window_above_threshold}
+    \begin{tabular}{cc}
+        \toprule
+        Window length $N_w$ & Above-threshold percentage \\
+        \midrule
+        1   & 1.33\% \\
+        10  & 2.10\% \\
+        100 & 6.60\% \\
+        500 & 23.16\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \section{Observer based method}
 
 In this section, faults will be detected and isolated using methods based on state estimation. Depending on the type of model, Luenberger estimators or Kalman filters will be applied to build residuals.

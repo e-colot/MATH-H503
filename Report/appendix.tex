@@ -1,5 +1,5 @@
 \appendices
-\section{Exact Ship Model}
+\section{Exact ship model}
 \label{appendix:exact_model}
 
 The model used in the simulations is, in continuous time,
@@ -56,7 +56,22 @@ The output equation matrices are
 
 The discrete-time model in (\ref{eq:ss_model}) is finally obtained using a ZOH discretization with sampling time $T_s = 0.2$ seconds.
 
-\section{Three-Phased signal Model}
+\section{Redundant pressure sensors model}
+\label{appendix:pressure_sensors}
+The system contains a constant state $x = 2$bars measured by 3 sensors. Those sensors are corrupted by uncorrelated zero-mean white gaussian noise with covariance $\mathbf{R}$. It is therefore described by:
+\begin{equation}
+    y[k] = \begin{bmatrix}1\\1\\1\end{bmatrix} x[k] + f(k) + \xi[k],
+\end{equation}
+where
+\begin{equation}
+    \xi \sim \mathcal{N}\left(\mathbf{0}, \mathbf{R}\right) \quad \text{and} \quad \mathbf{R} = \begin{bmatrix}
+        0.1 & 0 & 0\\
+        0 & 0.1 & 0\\
+        0 & 0 & 0.2
+    \end{bmatrix} \text{bar}^2.
+\end{equation}
+
+\section{Three-phased signal model}
 \label{appendix:three_phased_model}
 
 Fig. \ref{fig:data} shows the signal in a case no fault is applied. Knowing the sampling period $T_s = 1$ms, the frequency of the signal is computed by
