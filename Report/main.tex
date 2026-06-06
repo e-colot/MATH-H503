@@ -1,5 +1,7 @@
 \documentclass[conference]{IEEEtran}
 
+\usepackage{multirow}
+\usepackage{booktabs}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{cite}
@@ -193,7 +195,10 @@ If multiple errors occur at the same time, there is no way of determining which 
 
 \subsection{Redundant sensors}
 
-This section shows how a parity-based approach can be used to detect and isolate faults in a stochastic framework. The studied system is described in Appendix \ref{appendix:pressure_sensors} and its simpler form compared to (\ref{eq:ss_model}) facilitates the residual computation. The absence of a state update means $\Omega$ becomes the left null space of $C$ only, and the residual becomes:
+This section shows how a parity-based approach can be used to detect and isolate faults in a stochastic framework. The studied system is described in Appendix \ref{appendix:pressure_sensors} and two fault detection criterions will be compared: a first one based on the quadratic form of the residual, and the second one derived from the log-likelihood ratio.
+
+\subsubsection{Quadratic criterion}
+Starting from the residual computation (\ref{eq:residual_vector}) and taking into account the absence of a state update, $\Omega$ becomes the left null space of $C$ only, and the residual can be expressed as:
 \begin{equation}
     \begin{aligned}
         r[k] &= \Omega y[k]\\
@@ -218,7 +223,7 @@ This leads to the definition of the normalized residual such that $\tilde{r} \si
     \end{gathered}
 \end{equation}
 
-A decision layer is then built on top of this residual to estimate when a fault is occurring and when not. For this purpose, a detection measure $d[k]$ is defined based on sum of squares of residuals, meaning $d \sim \chi^2(d_f)$\footnote{$d_f$ is the number of degrees of freedom of variable $d$, which depends on its definition}. Two decision criterions are used here:
+A decision layer is then built on top of this residual to estimate when a fault is occurring and when not. For this purpose, a detection measure $d[k]$ is defined based on sum of squares of residuals, meaning $d \sim \chi^2(d_f)$\footnote{$d_f$ is the number of degrees of freedom of variable $d$, here equal to twice the window size.}. Two decision criterions are used here:
 \begin{equation}
     \label{eq:decision_criterion}
     d[k] = \begin{cases}
@@ -234,40 +239,56 @@ Fig. \ref{fig:residual_stochastic} shows that a faultless scenario (here with $1
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/RedundantSensors/Residual Stochastic.png}
-    \caption{Residuals (blue) and fault directions: $F_1$ in orange, $F_2$ in yellow and $F_3$ in purple. Residuals above the threshold are colored with the fault they are attributed to.}
+    \caption{Residuals (blue) and fault directions: $F_1$ in orange, $F_2$ in yellow and $F_3$ in purple. Residuals above the threshold are colored with the fault they are attributed to. This used the overall criterion of (\ref{eq:decision_criterion})}
     \label{fig:residual_stochastic}
 \end{figure}
 
 Isolation is performed by matching above-threshold residuals to the fault vector $F_i$ they are the closest (angularly). Fig. \ref{fig:residual_stochastic} shows that the faulty sensor is correctly identified.
 
-\subsubsection{Decision criterion comparison}
+\subsubsection{GLR}
+The Generalized log-Likelihood Ratio (GLR) criterion is based on the Neymann-Pearson test, which is the most powerful test for any chosen type 1 error probability. Using the notation of \ref{appendix:pressure_sensors}, the GLR criterion over a window of $N_w$ samples is defined as follows:
+\begin{equation}
+    \begin{cases}
+        P = \Big( R^{-1} - R^{-1} C \left(C^TR^{-1}C\right)^{-1}C^TR^{-1} \Big)\\
+        \ln \hat{\lambda} (y) [k] = y^T[k] P y[k]\\
+        \ln \hat{\lambda}_{\text{windowed}} (y) = \sum_{i=0}^{N_w} \ln \hat{\lambda} (y) [k-i]
+    \end{cases}
+\end{equation}
 
-From (\ref{eq:decision_criterion}), it can be seen that the overall criterion is equal to the windowed criterion, if the window length $N_w$ is set to $1$. Therefore, the decision criterion is compared for a set of window lengths as shown on Fig. \ref{fig:windowed_residual_stochastic}.
+The threshold is once again determined using the $\xi^2$ distribution with twice the window size as number of degrees of freedom. Tested on a faultless signal, the percentage of samples where the criterion exceeded the threshold were close to the desired type 1 error rate of 1\%.
+
+\subsubsection{Window size impact}
+
+Using the quadratic criterion, it can be seen from (\ref{eq:decision_criterion}) that the overall criterion is equal to the windowed criterion if the window length $N_w$ is set to $1$. Therefore, the decision criterion is compared for a set of window lengths (1, 10, 100 and 500).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/RedundantSensors/Windowed stochastic residual.png}
-    \caption{Decision variable depending on the window length for a fault occurring from sample 5000 until the last sample. $d[k]$ is scaled by their threshold such that their overlapping has a meaning.}
+    \caption{Decision variable depending on the window length with a fault magnitude 10 times smaller than the steady state. $d[k]$ is scaled by their threshold such that overlapping it with different window size has a meaning.}
     \label{fig:windowed_residual_stochastic}
 \end{figure}
 
-It can be seen that increasing the window length smoothen $d[k]$, which makes it stick closer to the threshold. Once the default has occurred, almost every sample is detected as being faulty and the above-threshold percentage increases with the window size, as shown in Table \ref{tab:window_above_threshold}.
+Fig. \ref{fig:windowed_residual_stochastic} shows that increasing the window length smoothen $d[k]$, which makes it stick closer to the threshold. Once the default has occurred, almost every sample is detected as being faulty and the above-threshold percentage increases with the window size, as shown in Table \ref{tab:window_above_threshold}.
 
 \begin{table}[htbp]
     \centering
-    \caption{Percentage of samples above threshold depending on the window length .}
+    \caption{Percentage of samples above threshold depending on the window length for the quadratic criterion (\ref{eq:decision_criterion}) and the GLR criterion.}
     \label{tab:window_above_threshold}
-    \begin{tabular}{cc}
+    \begin{tabular}{ccc}
         \toprule
-        Window length $N_w$ & Above-threshold percentage \\
+        \multirow{2}{*}{Window length $N_w$} & \multicolumn{2}{c}{Above-threshold percentage} \\
+        \cmidrule(r){2-3}
+                                            & Quadratic & GLR \\
         \midrule
-        1   & 1.33\% \\
-        10  & 2.10\% \\
-        100 & 6.60\% \\
-        500 & 23.16\% \\
+        1   & 1.74\%  & 1.67\%  \\
+        10  & 2.75\%  & 2.80\%  \\
+        100 & 13.41\% & 13.10\% \\
+        500 & 46.51\% & 50.82\% \\
         \bottomrule
     \end{tabular}
 \end{table}
+
+The same tests were applied using the GLR criterion, which gave a figure similar to Fig.~\ref{fig:windowed_residual_stochastic} and is therefore not showed. The above-threshold percentage values are also in Table~\ref{tab:window_above_threshold}, showing similar performances to the ones obtained with the quadratic criterion.
 
 \section{Observer based method}
 

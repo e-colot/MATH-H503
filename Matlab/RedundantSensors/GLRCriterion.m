@@ -1,23 +1,23 @@
 clear; close all; clc;
 
-% Uses d[k] = r_1[k]² + r_2[k]² as fault criterion
+% Uses the generalized log-likelihood ratio as fault criterion
 
 %% System + signals generation
 
     N = 1e4;
     n_sensors = 3;
-    C = ones(n_sensors, 1);
+    M = ones(n_sensors, 1);
     steadyState = 2;
     
-    x = steadyState * ones(1, N);
-    R = diag([0.1 0.1 0.2]);
+    eta = steadyState * ones(1, N);
+    S = diag([0.1 0.1 0.2]);
     
-    noise = R.^(0.5) * randn(3, N);
+    noise = S.^(0.5) * randn(3, N);
     
     f = 0.1*steadyState * ones(1, N);
     
     % healthy
-        y_h = C * x + noise;
+        y_h = M * eta + noise;
     % fault on sensor 1
         y_1 = y_h + [1;0;0] * f;
     % fault on sensor 2
@@ -34,35 +34,30 @@ clear; close all; clc;
 %     plot(y_2(1,:), LineWidth=2, DisplayName='y_2');
 %     legend()
 
-
 %% Healthy signal
 disp('Healthy signal:')
 
-y = y_h;
-
-omega = null(C')';
-F = inv(chol(omega*R*omega.')) * omega;
-F_normalized = F./vecnorm(F);
-
-r = F * y;
-
-r1_squared = r(1,:).^2;
-r2_squared = r(2,:).^2;
-
-r_squared = r1_squared + r2_squared;
+Z = y_h;
 
 N_window_list = [1 10 100 500];
-
-figure('Name', 'Windowed stochastic residual');
+figure('Name', 'GLR residual');
 colors = get(gca, 'colororder');
+
+% Constant value used for ln lambda computation
+insideTerm = inv(S) - inv(S) * M * inv(M.'*inv(S)*M) * M.' * inv(S);
+
 hold on;
 
-for N_window = N_window_list   
-    
-    d = r_squared(N_window:end);
+for N_window = N_window_list
+
+    lnLambda = diag(Z.' * insideTerm * Z);
+
+    % Remove the first elements (window not long enough)
+    d = lnLambda(N_window:end);
     samples = N_window:N_window-1+length(d);
+
     for k = 1:N_window-1
-        d = d + r_squared(N_window-k:end-k);
+        d = d + lnLambda(N_window-k:end-k);
     end
     
     % chi-square test
@@ -75,40 +70,35 @@ for N_window = N_window_list
     fprintf('    %.2f%% above threshold with a window size of %d \n', above_pct, N_window);
 end
 
-plot([N_window N], [1, 1], LineStyle="--", LineWidth=2, Color='r', DisplayName='Threshold')
+plot([1 N], [1, 1], LineStyle="--", LineWidth=2, Color='r', DisplayName='Threshold')
 xlabel('time step k');
-ylabel('d[k]/thr');
+ylabel('ln(\lambda)/thr');
 xlim([max(N_window_list) N]);
 legend('Interpreter','latex');
 
 %% Sensor 1 fault
 disp('Fault on sensor 1:')
-
-y = y_1;
-
-omega = null(C')';
-F = inv(chol(omega*R*omega.')) * omega;
-F_normalized = F./vecnorm(F);
-
-r = F * y;
-
-r1_squared = r(1,:).^2;
-r2_squared = r(2,:).^2;
-
-r_squared = r1_squared + r2_squared;
+Z = y_1;
 
 N_window_list = [1 10 100 500];
-
-figure('Name', 'Windowed stochastic residual');
+figure('Name', 'GLR residual');
 colors = get(gca, 'colororder');
+
+% Constant value used for ln lambda computation
+insideTerm = inv(S) - inv(S) * M * inv(M.'*inv(S)*M) * M.' * inv(S);
+
 hold on;
 
-for N_window = N_window_list   
-    
-    d = r_squared(N_window:end);
+for N_window = N_window_list
+
+    lnLambda = diag(Z.' * insideTerm * Z);
+
+    % Remove the first elements (window not long enough)
+    d = lnLambda(N_window:end);
     samples = N_window:N_window-1+length(d);
+
     for k = 1:N_window-1
-        d = d + r_squared(N_window-k:end-k);
+        d = d + lnLambda(N_window-k:end-k);
     end
     
     % chi-square test
@@ -121,8 +111,8 @@ for N_window = N_window_list
     fprintf('    %.2f%% above threshold with a window size of %d \n', above_pct, N_window);
 end
 
-plot([N_window N], [1, 1], LineStyle="--", LineWidth=2, Color='r', DisplayName='Threshold')
+plot([1 N], [1, 1], LineStyle="--", LineWidth=2, Color='r', DisplayName='Threshold')
 xlabel('time step k');
-ylabel('d[k]/thr');
+ylabel('ln(\lambda)/thr');
 xlim([max(N_window_list) N]);
 legend('Interpreter','latex');
