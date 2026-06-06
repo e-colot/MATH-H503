@@ -250,9 +250,10 @@ The Generalized log-Likelihood Ratio (GLR) criterion is based on the Neymann-Pea
 \begin{equation}
     \begin{cases}
         P = \Big( R^{-1} - R^{-1} C \left(C^TR^{-1}C\right)^{-1}C^TR^{-1} \Big)\\
-        \ln \hat{\lambda} (y) [k] = y^T[k] P y[k]\\
-        \ln \hat{\lambda}_{\text{windowed}} (y) = \sum_{i=0}^{N_w} \ln \hat{\lambda} (y) [k-i]
+        \ln \hat{\lambda} [k] = y^T[k] P y[k]\\
+        \ln \hat{\lambda}_{\text{windowed}} [k] = \sum_{i=0}^{N_w} \ln \hat{\lambda} [k-i]
     \end{cases}
+    \label{eq:GLR_algo}
 \end{equation}
 
 The threshold is once again determined using the $\xi^2$ distribution with twice the window size as number of degrees of freedom. Tested on a faultless signal, the percentage of samples where the criterion exceeded the threshold were close to the desired type 1 error rate of 1\%.
@@ -272,7 +273,7 @@ Fig. \ref{fig:windowed_residual_stochastic} shows that increasing the window len
 
 \begin{table}[htbp]
     \centering
-    \caption{Percentage of samples above threshold depending on the window length for the quadratic criterion (\ref{eq:decision_criterion}) and the GLR criterion.}
+    \caption{Percentage of samples above threshold depending on the window length for the quadratic criterion (\ref{eq:decision_criterion}) and the GLR criterion (\ref{eq:GLR_algo}).}
     \label{tab:window_above_threshold}
     \begin{tabular}{ccc}
         \toprule
@@ -397,6 +398,52 @@ Fig. \ref{fig:fault_present_alt_Kalman} showcases the effectiveness of fault iso
     \caption{Measured signal (top) and residuals(bottom).}
     \label{fig:fault_present_alt_Kalman}
 \end{figure}
+
+\section{On-line Fault Detection}
+
+On-line fault detection aims at determining the occurrence of a fault and the time at which it occurred on a continuously measured signal. Two algorithms are used here, namely the CUSUM and the GLR, and are described in this section.
+
+\subsection{CUSUM}
+
+This algorithm used the cumulative sum, hence its name, of the log-likelihood ratio of a fault occurring on a single data sample:
+
+\begin{equation}
+    \begin{cases}
+        s[k] = \ln \frac{p_{\text{fault}} (r[k])}{p_{\text{no fault}} (r[k])}\\
+        S[k] = \sum_{i=1}^{k} s[k]
+    \end{cases}
+    \label{eq:CUSUM}
+\end{equation}
+
+The maximal value of this cumulative sum $S[k]$ is used as decision function
+
+\begin{equation}
+    g[k] = \operatorname{max}_{1 \leq j \leq k} S[j],
+\end{equation}
+
+triggered if it exceeds a chosen threshold $h$. The estimated time of default occurrence is found by looking for the first index $m = k-d[k]$ such that $g[m + i] > 0, \forall i \in \{0, \dots, k-m\}$.
+
+Those were the basic formulas but the implementation uses a recursive version to compute the decision $g[k]$ and the detection delay $d[k]$:
+\begin{gather}
+        g[k] = \sup\Big(0, g[k-1] + s[k]\Big)\\
+        d[k] = \begin{cases}
+            d[k-1] + 1 \qquad \text{if } g[k-1] > 0\\
+            1 \hspace{2.33cm} \text{otherwise}
+        \end{cases}
+\end{gather}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/OnlineChangeDetection/CUSUM.png}
+    \caption{CUSUM results for the basic method (left) and the CUSUM with reset (right). The signal has a fault starting at $k = 5,000$ and ending at $k = 10,000$.}
+    \label{fig:CUSUM}
+\end{figure}
+
+The left column of Fig.~\ref{fig:CUSUM} shows the fault is indeed detected and the CUSUM algorithm estimates it occurred at sample 4998 instead of 5000. The end of the fault however stays undetected. When there is no fault, $s[k]$ is negative in average as the probability of having no fault is larger than the one of having a fault, meaning $S[k]$ decreases. It is only when it has passed under the threshold $h$ that a new error might be detected again.
+
+The right column therefore implements a \textit{CUSUM with reset} algorithm, which once a change in the mean is detected change its decision function in order for it to track when the mean goes back to the fault-free value. This is simply done by resetting $g[m]$ to 0 and by replacing $s[k]$ by $-s[k]$, as the minus with the logarithm will invert the probability in (\ref{eq:CUSUM}).
+
+The disappearance of the fault can therefore be detected (at sample 10007 instead of 10000) and the algorithm then resets again to track any new fault.
 
 \include{appendix}
 \end{document}
