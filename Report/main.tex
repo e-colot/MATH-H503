@@ -395,13 +395,15 @@ Fig. \ref{fig:fault_present_alt_Kalman} showcases the effectiveness of fault iso
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/ObserverMethods/Fault present alt Kalman.png}
-    \caption{Measured signal (top) and residuals(bottom).}
+    \caption{Measured signal (top) and residuals (bottom).}
     \label{fig:fault_present_alt_Kalman}
 \end{figure}
 
 \section{On-line Fault Detection}
 
 On-line fault detection aims at determining the occurrence of a fault and the time at which it occurred on a continuously measured signal. Two algorithms are used here, namely the CUSUM and the GLR, and are described in this section.
+
+The signal on which those algorithms are applied is detailed in Appendix \ref{annex:onlineSystem}.
 
 \subsection{CUSUM}
 
@@ -432,18 +434,53 @@ Those were the basic formulas but the implementation uses a recursive version to
         \end{cases}
 \end{gather}
 
+In our situation, the log-likelihood ratio $s$ can in such case be expressed as
+
+\begin{equation}
+    s[k] = \frac{m_1 - m_0}{\sigma^2}\Big(r[k] - \frac{m_1 + m_0}{2}\Big)
+    \label{eq:CUSUM_s}
+\end{equation}
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.48\textwidth]{../Matlab/OnlineChangeDetection/CUSUM.png}
-    \caption{CUSUM results for the basic method (left) and the CUSUM with reset (right). The signal has a fault starting at $k = 5,000$ and ending at $k = 10,000$.}
+    \caption{CUSUM results for the basic method (left) and the CUSUM with reset (right) for the signal described in Appendix \ref{annex:onlineSystem}}
     \label{fig:CUSUM}
 \end{figure}
 
 The left column of Fig.~\ref{fig:CUSUM} shows the fault is indeed detected and the CUSUM algorithm estimates it occurred at sample 4998 instead of 5000. The end of the fault however stays undetected. When there is no fault, $s[k]$ is negative in average as the probability of having no fault is larger than the one of having a fault, meaning $S[k]$ decreases. It is only when it has passed under the threshold $h$ that a new error might be detected again.
 
-The right column therefore implements a \textit{CUSUM with reset} algorithm, which once a change in the mean is detected change its decision function in order for it to track when the mean goes back to the fault-free value. This is simply done by resetting $g[m]$ to 0 and by replacing $s[k]$ by $-s[k]$, as the minus with the logarithm will invert the probability in (\ref{eq:CUSUM}).
+The right column of Fig.~\ref{fig:CUSUM} therefore implements a \textit{CUSUM with reset} algorithm, which once a change in the mean is detected change its decision function in order for it to track when the mean goes back to the fault-free value. This is simply done by resetting $g[m]$ to 0 and by replacing $s[k]$ by $-s[k]$, as the minus with the logarithm will invert the probability in (\ref{eq:CUSUM}).
 
 The disappearance of the fault can therefore be detected (at sample 10007 instead of 10000) and the algorithm then resets again to track any new fault.
+
+The computation of $s$ (\ref{eq:CUSUM_s}) however requires the fault amplitude to be known, which is why the GLR on-line criterion is introduced.
+
+\subsection{GLR}
+
+The on-line GLR algorithm choses at each time instant the most likely time of fault occurrence in a window of fixed size $M$. The decision criterion is then computed based on this estimated fault occurrence time $j$, and a fault is detected if it passes above a fixed threshold. The decision criterion $g_{\text{GLR}}$ is expressed as:
+
+\begin{equation}
+    g_{\text{GLR}}[k] = \max_{k-M \leq j \leq k} \frac{\left(\sum_{i=j}^{k} (r[i]-m_0)\right)^2}{2\sigma^2 \times \left(k-j+1\right)}
+    \label{eq:glrCirtOnline}
+\end{equation}
+
+Once a value exceeds the threshold $h$, the maximum likelihood estimate of the amplitude change can be computed using:
+\begin{equation}
+    \hat{\nu}[k] = \frac{\sum_{i=j}^{k} (r[i]-m_0)}{k-j+1},
+\end{equation}
+where $j$ is the one that maximized (\ref{eq:glrCirtOnline}). This was tested with different window sizes $M$, and the results are shown on Fig. \ref{fig:GLR_online}.
+
+Compared to the results of the CUSUM algorithm, the detection time is worse as $g[k]$ needs to cross the threshold in order for the GLR to detect the fault. It is however able to detect the amplitude of the fault, making it more robust against unknown faults.
+
+The window size impacts two main parameters: the required threshold and the time to settle after the fault disappears. With the smallest window size, $g[k]$ is relatively close to the threshold even when there is a fault. During the experiments, smaller window sizes $(10, 50)$ had to be removed as they were not able to distinguish faulty and faultless samples. A larger window size allows to chose a larger threshold, but $g[k]$ then takes more time to fall back under the threshold after the fault disappears.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../Matlab/OnlineChangeDetection/GLR.png}
+    \caption{On-line GLR fault detection with different window sizes.}
+    \label{fig:GLR_online}
+\end{figure}
 
 \include{appendix}
 \end{document}

@@ -62,7 +62,7 @@ legend('Interpreter','latex');
 subplot(325); hold on; grid on;
 plot(d, LineWidth=2, color=colors(2,:));
 xlabel('Time step [k]');
-ylabel('Detection delay');
+ylabel('d[k]');
 xlim([4 11]*1e3);
 
 %% CUSUM with reset

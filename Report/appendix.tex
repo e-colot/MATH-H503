@@ -105,3 +105,14 @@ Because there is an offset between the three phases, the output relationship is 
 
 This continuous-time model is then discretized using the ZOH with the known sampling frequency.
 
+\section{On-line system}
+\label{annex:onlineSystem}
+
+The signal used is a gaussian white noise sequence $r[k]$. It contains $15000$ samples which have a mean $m_0 = 0$ and a variance $\sigma^2 = 0.5$. A step-like fault of amplitude $m_1 = 0.5$ is added on the samples ranging from index $5000$ to $10000$. The studied signal is therefore constructed as follows:
+\begin{align}
+    r_{\text{true}} &\sim \mathcal{N}\left(m_0, \sigma^2\right)\\
+    f[k] &= \begin{cases} m_1-m_0 \qquad \text{if } k \in [5000, 10000]\\
+        0 \hspace{1.9cm} \text{otherwise} 
+    \end{cases}\\
+    r[k] &= r_{\text{true}}[k] + f[k]
+\end{align}
